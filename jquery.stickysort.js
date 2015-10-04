@@ -78,9 +78,14 @@
 						$stickyCol.find('th').add($stickyInsct.find('th')).width($t.find('thead th').first().width());
 
 						// Set position sticky intersect
-						$stickyCol.find('table').css({
-							left: $stickyWrap.offset().left
-						});
+						// START Bug Fix #1
+						// Hyperlinks in the sticky column were not clickable when the form first loaded because the sticky column
+						// left position was positioned at 120px.
+						// Weirdly, it seemed to 'fix' itself when the user scrolled down the page using the mouse
+						// $stickyCol.find('table').css({
+						//	left: $stickyWrap.offset().left
+						// });
+						// END Bug Fix #1
 					},
 					repositionSticky = function () {
 						// Return value of calculated allowance
@@ -135,7 +140,14 @@
 									opacity: 0,
 									'pointer-events': 'none',
 									position: 'absolute',
-									left: 0
+
+									// START Bug Fix #2
+									// When the user scrolls slightly to the right, the sticky intersect was being displayed to the left-hand side of the sticky column,
+									// so we need to add on the scrollLeft() margin to ensure that it always displays in the correct location
+									// left: 0
+									left: $stickyWrap.scrollLeft(),
+									top: 0
+									// END Bug Fix #2
 								});
 							}
 						}
@@ -194,17 +206,22 @@
 						}
 					};
 
-				setWidths();
+				// START Bug Fix #3
+				// If sorting is enabled, then the sticky header initially appears 43px to the right of where it should be (until the user clicks [F5] when it miraculously appears
+				// to 'fix' itself), so the following lines of code should be moved to immediately AFTER the sorting section below
+				//
+				// setWidths();
 
-				$t.parent('.sticky-wrap').scroll($.throttle(settings.scrollThrottle, repositionSticky));
+				// $t.parent('.sticky-wrap').scroll($.throttle(settings.scrollThrottle, repositionSticky));
 
-				$w
-				.load(setWidths)
-				.resize($.debounce(settings.resizeThrottle, function () {
-					setWidths();
-					repositionSticky();
-				}))
-				.scroll($.throttle(settings.scrollThrottle, repositionSticky));
+				// $w
+				// .load(setWidths)
+				// .resize($.debounce(settings.resizeThrottle, function () {
+				// 	setWidths();
+				// 	repositionSticky();
+				// }))
+				// .scroll($.throttle(settings.scrollThrottle, repositionSticky));
+				// END Bug Fix #3
 
 				// Extended feature: Sortable table
 				// Do sorting only when original table is slated for sorting:
@@ -221,10 +238,20 @@
 					$stickyWrap
 					.addClass('sortable')
 					.find('thead th')
+					// START Bug Fix #4
+					// Increase height of column header #1 ('Learner Name') when the sticky column is on display (it otherwise defaults to 48px)
+					.css({ height: $thead.height() })
+					// END Bug Fix #4
 						.addClass('sort-default')
 						.data('sortState', 1)
-						.wrapInner('<div />')
-						.find('div')
+						// START Bug Fix #5
+						// The following code adds multiple sort buttons on because it targets ALL divs within the cell rather than
+						// just the one it's adding - so instead we'll add the new one as 'sa-stickysort' and target just that one
+						// .wrapInner('<div />')
+						// .find('div')
+						.wrapInner('<div class="stickysortdiv" />')
+						.find('.stickysortdiv')
+						// END Bug Fix #5
 							.css({ position: 'relative' })
 							.append('<a href="#" class="sort-handle"></a>')
 							.find('.sort-handle')
@@ -319,6 +346,22 @@
 
 					});
 				}
+
+				// START Bug Fix #6
+				// If sorting is enabled, then the sticky header initially appears 43px to the right of where it should be (until the user clicks [F5] when it miraculously appears
+				// to 'fix' itself), so the following lines of code should be moved to immediately AFTER the sorting section above
+				setWidths();
+
+				$t.parent('.sticky-wrap').scroll($.throttle(settings.scrollThrottle, repositionSticky));
+
+				$w
+				.load(setWidths)
+				.resize($.debounce(settings.resizeThrottle, function () {
+				    setWidths();
+				    repositionSticky();
+				}))
+				.scroll($.throttle(settings.scrollThrottle, repositionSticky));
+				// END Bug Fix #6
 			}
 		});
 
