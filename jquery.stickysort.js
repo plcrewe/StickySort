@@ -281,7 +281,12 @@
 								return parseInt($(a).attr('data-sortOrder')) - parseInt($(b).attr('data-sortOrder'));
 							});
 
-							$th.add($thSib).removeClass().addClass('sort-default');
+							// START PAL
+							// If sorting is enabled, then clicking the column header to sort the column not only removes the 'sort-default' class - but ALL classes,
+							// causing everything to move around on the screen!
+							// $th.add($thSib).removeClass().addClass('sort-default');
+							$th.add($thSib).removeClass('sort-asc').removeClass('sort-desc').addClass('sort-default');
+							// END PAL
 
 						} else {
 							// Sort rows
@@ -320,9 +325,20 @@
 							// Reverse order on second click
 							if($th.data('sortState')%3 == 2) {
 								$rows = $rows.reverse();
-								$th.add($thSib).removeClass().addClass('sort-desc');
+
+								// START PAL
+								// If sorting is enabled, then clicking the column header to sort the column not only removes the 'sort-default' class - but ALL classes,
+								// causing everything to move around on the screen!
+								// $th.add($thSib).removeClass().addClass('sort-desc');
+								$th.add($thSib).removeClass('sort-default').removeClass('sort-asc').addClass('sort-desc');
+								// END PAL
 							} else {
-								$th.add($thSib).removeClass().addClass('sort-asc');
+								// START PAL
+								// If sorting is enabled, then clicking the column header to sort the column not only removes the 'sort-default' class - but ALL classes,
+								// causing everything to move around on the screen!
+								// $th.add($thSib).removeClass().addClass('sort-asc');
+								$th.add($thSib).removeClass('sort-default').removeClass('sort-desc').addClass('sort-asc');
+								// END PAL
 							}
 						}
 
@@ -332,13 +348,24 @@
 						// Sync state across all <th> elements
 						$th.add($thSib).data('sortState', state%3);
 
+						// START PAL
+						// If sorting is enabled, then clicking the column header to sort the column not only removes the 'sort-default' class - but ALL classes,
+						// causing everything to move around on the screen!
 						// Reset status of other <th>
-						$stickyWrap.find('table').each(function(i) {
+						//$stickyWrap.find('table').each(function(i) {
+						//	$(this)
+						//	.find('thead th').not(':eq('+colIndex+')')
+						//		.data('sortState', 1)
+						//		.removeClass().addClass('sort-default');
+						//});
+
+						$stickyWrap.find('table').each(function (i) {
 							$(this)
-							.find('thead th').not(':eq('+colIndex+')')
+							.find('thead th').not(':eq(' + colIndex + ')')
 								.data('sortState', 1)
-								.removeClass().addClass('sort-default');
+								.removeClass('sort-asc').removeClass('sort-desc').addClass('sort-default');
 						});
+						// END PAL
 
 						// Add rows
 						$t.find('tbody').html($rows);
